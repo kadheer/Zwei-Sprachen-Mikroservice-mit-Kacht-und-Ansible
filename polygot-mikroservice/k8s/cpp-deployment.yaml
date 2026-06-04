@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cpp-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cpp-service
+  template:
+    metadata:
+      labels:
+        app: cpp-service
+    spec:
+      containers:
+      - name: cpp-service
+        image: polyglot/cpp-service:latest   # Lokales Image – siehe Build-Script
+        ports:
+        - containerPort: 8080
