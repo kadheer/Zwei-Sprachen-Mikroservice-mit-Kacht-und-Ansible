@@ -1,1 +1,46 @@
-
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-service
+  labels:
+    app: python-service
+spec:
+  replicas: 1                     # Anzahl der Pod-Instanzen
+  selector:
+    matchLabels:
+      app: python-service
+  template:
+    metadata:
+      labels:
+        app: python-service
+    spec:
+      containers:
+      - name: python-service
+        image: polyglot/python-service:latest   # Lokales Image für Minikube
+        # Falls du ein gepushstes Image verwenden willst, z.B.:
+        # image: deinbenutzername/polyglot-python:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        env:
+        - name: CPP_SERVICE_URL
+          value: "http://cpp-service:8080/quadrat"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 3
+          periodSeconds: 5
