@@ -1,0 +1,25 @@
+- name: Minikube einrichten und Microservice deployen
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Minikube starten (falls nicht läuft)
+      command: minikube status
+      register: minikube_status
+      ignore_errors: yes
+
+    - name: Minikube starten
+      command: minikube start --driver=docker
+      when: minikube_status is failed
+
+    - name: Docker-Images lokal bauen (mit Minikubes Docker-Env)
+      command: eval $(minikube docker-env) && docker build -t polyglot/cpp-service ../cpp-service
+      args:
+        executable: /bin/bash
+
+    - name: Python-Image bauen
+      command: eval $(minikube docker-env) && docker build -t polyglot/python-service ../python-service
+      args:
+        executable: /bin/bash
+
+    - name: Kubernetes-Ressourcen anwenden
+      command: kubectl apply -f ../k8s/
